@@ -1,12 +1,13 @@
 (function () {
     "use strict";
 
-    const DEFAULTS = Object.freeze({ beta0: 1.2, beta1: 0.75, sigma: 1.1, slices: 7, seed: 17 });
+    const DEFAULTS = Object.freeze({ beta0: 1.2, beta1: 0.75, sigma: 1.1, slices: 7, observations: 14, seed: 17 });
     const TRUE_MODEL = Object.freeze({ beta0: 1.2, beta1: 0.75, sigma: 1.1 });
     const LIMITS = Object.freeze({
         beta0: { min: -4, max: 6 },
         beta1: { min: -2, max: 3 },
-        sigma: { min: 0.35, max: 3 }
+        sigma: { min: 0.35, max: 3 },
+        observations: { min: 14, max: 100 }
     });
 
     const COLORS = Object.freeze({
@@ -39,6 +40,7 @@
         beta1: DEFAULTS.beta1,
         sigma: DEFAULTS.sigma,
         slices: DEFAULTS.slices,
+        observations: DEFAULTS.observations,
         seed: DEFAULTS.seed,
         showResiduals: true,
         showContributions: true,
@@ -53,10 +55,10 @@
 
     function cacheElements() {
         const ids = [
-            "beta0-slider", "beta1-slider", "sigma-slider", "slice-slider",
-            "beta0-display", "beta1-display", "sigma-display", "slice-display",
+            "beta0-slider", "beta1-slider", "sigma-slider", "observation-slider", "slice-slider",
+            "beta0-display", "beta1-display", "sigma-display", "observation-display", "slice-display",
             "show-residuals", "show-contributions", "use-mle-button", "reset-button",
-            "new-sample-button", "candidate-equation", "sample-seed",
+            "new-sample-button", "candidate-equation", "sample-seed", "sample-size",
             "metric-loglik-value", "metric-gap-value", "metric-sse-value", "metric-rmse-value",
             "conditional-tab", "likelihood-tab", "conditional-panel", "likelihood-panel",
             "conditional-graph", "likelihood-graph", "download-chart-button"
@@ -102,12 +104,30 @@
         return Math.sqrt(-2 * Math.log(first)) * Math.cos(2 * Math.PI * second);
     }
 
-    function generateSample(seed, count = 14) {
+    function generateSample(seed, count = DEFAULTS.observations) {
+        const safeCount = Math.round(clamp(count, LIMITS.observations.min, LIMITS.observations.max));
         const random = mulberry32(seed);
-        const x = linspace(0.65, 9.35, count);
-        const y = x.map((value) => (
-            TRUE_MODEL.beta0 + TRUE_MODEL.beta1 * value + TRUE_MODEL.sigma * standardNormal(random)
-        ));
+        const points = [];
+        const baseX = linspace(0.65, 9.35, DEFAULTS.observations);
+
+        baseX.forEach((xValue) => {
+            points.push({
+                x: xValue,
+                y: TRUE_MODEL.beta0 + TRUE_MODEL.beta1 * xValue + TRUE_MODEL.sigma * standardNormal(random)
+            });
+        });
+
+        for (let index = DEFAULTS.observations; index < safeCount; index += 1) {
+            const xValue = 0.65 + (9.35 - 0.65) * random();
+            points.push({
+                x: xValue,
+                y: TRUE_MODEL.beta0 + TRUE_MODEL.beta1 * xValue + TRUE_MODEL.sigma * standardNormal(random)
+            });
+        }
+
+        points.sort((first, second) => first.x - second.x);
+        const x = points.map((point) => point.x);
+        const y = points.map((point) => point.y);
         return prepareSample(seed, x, y);
     }
 
@@ -350,7 +370,12 @@
             x: sample.x,
             y: sample.y,
             mode: "markers",
-            marker: { size: 10, color: COLORS.teal, opacity: 0.93, line: { color: COLORS.white, width: 1.4 } },
+            marker: {
+                size: Math.max(6.5, 10 - 0.04 * (sample.x.length - DEFAULTS.observations)),
+                color: COLORS.teal,
+                opacity: 0.93,
+                line: { color: COLORS.white, width: 1.4 }
+            },
             customdata: model.fitted.map((mean, index) => [mean, model.residuals[index]]),
             name: "Observed data",
             hovertemplate: "<b>Observed point</b><br>x = %{x:.3f}<br>y = %{y:.3f}<br>Model mean = %{customdata[0]:.3f}<br>Residual = %{customdata[1]:.3f}<extra></extra>"
@@ -407,7 +432,7 @@
                     y: 0.98,
                     xref: "paper",
                     yref: "paper",
-                    text: `E[Y | X=x] = ${state.beta0.toFixed(2)} + ${state.beta1.toFixed(3)}x<br>σ = ${state.sigma.toFixed(3)}`,
+                    text: `E[Y | X=x] = ${state.beta0.toFixed(2)} + ${state.beta1.toFixed(3)}x<br>σ = ${state.sigma.toFixed(3)} · n = ${sample.y.length}`,
                     showarrow: false,
                     align: "left",
                     xanchor: "left",
@@ -442,7 +467,7 @@
                 bordercolor: COLORS.border,
                 font: { color: COLORS.navy, size: 12 }
             },
-            uirevision: `conditional-${sample.seed}`,
+            uirevision: `conditional-${sample.seed}-${sample.y.length}`,
             transition: { duration: 0 }
         };
 
@@ -538,7 +563,7 @@
                     bordercolor: COLORS.border,
                     font: { color: COLORS.navy, size: 12 }
                 },
-                uirevision: `likelihood-${sample.seed}`,
+                uirevision: `likelihood-${sample.seed}-${sample.y.length}`,
                 transition: { duration: 0 }
             }
         };
@@ -548,9 +573,11 @@
         elements["beta0-display"].textContent = state.beta0.toFixed(3);
         elements["beta1-display"].textContent = state.beta1.toFixed(3);
         elements["sigma-display"].textContent = state.sigma.toFixed(3);
+        elements["observation-display"].textContent = String(state.observations);
         elements["slice-display"].textContent = String(state.slices);
         elements["candidate-equation"].textContent = `Current: N(${state.beta0.toFixed(2)} + ${state.beta1.toFixed(3)}x, ${state.sigma.toFixed(3)}²)`;
         elements["sample-seed"].textContent = String(state.seed);
+        elements["sample-size"].textContent = String(state.observations);
         elements["metric-loglik-value"].textContent = formatNumber(model.logLikelihood);
         elements["metric-gap-value"].textContent = formatNumber(model.likelihoodGap);
         elements["metric-sse-value"].textContent = formatNumber(model.sse);
@@ -594,6 +621,13 @@
         state.beta1 = Number(elements["beta1-slider"].value);
         state.sigma = Math.max(0.000001, Number(elements["sigma-slider"].value));
         state.slices = Number(elements["slice-slider"].value);
+
+        const nextObservationCount = Math.round(Number(elements["observation-slider"].value));
+        if (nextObservationCount !== state.observations) {
+            state.observations = nextObservationCount;
+            state.sample = generateSample(state.seed, state.observations);
+        }
+
         state.showResiduals = elements["show-residuals"].checked;
         state.showContributions = elements["show-contributions"].checked;
     }
@@ -602,6 +636,7 @@
         elements["beta0-slider"].value = String(state.beta0);
         elements["beta1-slider"].value = String(state.beta1);
         elements["sigma-slider"].value = String(state.sigma);
+        elements["observation-slider"].value = String(state.observations);
         elements["slice-slider"].value = String(state.slices);
         elements["show-residuals"].checked = state.showResiduals;
         elements["show-contributions"].checked = state.showContributions;
@@ -640,7 +675,7 @@
     }
 
     function attachEventListeners() {
-        ["beta0-slider", "beta1-slider", "sigma-slider", "slice-slider"].forEach((id) => {
+        ["beta0-slider", "beta1-slider", "sigma-slider", "observation-slider", "slice-slider"].forEach((id) => {
             elements[id].addEventListener("input", () => {
                 syncStateFromControls();
                 scheduleRender();
@@ -668,7 +703,7 @@
 
         elements["new-sample-button"].addEventListener("click", () => {
             state.seed += 1;
-            state.sample = generateSample(state.seed);
+            state.sample = generateSample(state.seed, state.observations);
             state.slices = DEFAULTS.slices;
             state.showResiduals = true;
             state.showContributions = true;
@@ -705,7 +740,7 @@
 
     function initialize() {
         cacheElements();
-        state.sample = generateSample(state.seed);
+        state.sample = generateSample(state.seed, state.observations);
         syncControlsFromState();
         attachEventListeners();
         initializePlots().catch((error) => {
