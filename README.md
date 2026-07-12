@@ -1,8 +1,8 @@
 # Interactive Regression Likelihood Explorer
 
-An interactive, browser-based visualization of maximum likelihood estimation in a normal homoskedastic linear regression.
+An interactive, browser-based visualization of maximum likelihood estimation and ordinary least squares in a normal homoskedastic linear regression.
 
-The application keeps the observed sample fixed while the user changes the intercept, slope, and common conditional standard deviation. The regression line, conditional normal densities, residuals, observation-level density contributions, likelihood metrics, and likelihood landscape update immediately.
+The application keeps the observed sample fixed while the user changes the intercept, slope, and common conditional standard deviation. The regression line, conditional normal densities, residuals, squared-residual geometry, likelihood metrics, and likelihood landscape update immediately.
 
 ## Live application
 
@@ -10,7 +10,7 @@ The application keeps the observed sample fixed while the user changes the inter
 
 ## Purpose
 
-The project is designed to make the geometry and probability model behind linear-regression maximum likelihood visually intuitive.
+The project is designed to make both the probability model and the optimization geometry behind linear regression visually intuitive.
 
 For each fixed predictor value \(x_i\), the model assumes a conditional normal distribution centered at
 
@@ -20,7 +20,22 @@ $$
 
 Changing the regression coefficients shifts the centers of all conditional distributions simultaneously. Changing \(\sigma\) changes their spread and peak height without changing their centers.
 
-The observed data remain fixed throughout this process. Only the candidate probability model changes.
+The same candidate coefficients can also be viewed geometrically through the residuals
+
+$$
+e_i = y_i - \hat y_i
+$$
+
+and the ordinary least-squares objective
+
+$$
+\operatorname{SSE}(\beta_0,\beta_1)
+=
+\sum_{i=1}^{n}
+\left(y_i-\beta_0-\beta_1x_i\right)^2.
+$$
+
+The observed data remain fixed throughout. Only the candidate probability model and regression line move.
 
 ## Main interactions
 
@@ -30,9 +45,9 @@ The observed data remain fixed throughout this process. Only the candidate proba
 - Increase **Sample size \(n\)** from 14 to 200 observations.
 - Increase **Displayed density slices** up to the full sample size.
 - Toggle residuals and observation-level density contributions.
-- Select **Use MLE** to move the controls to the maximum-likelihood estimates for the current sample.
+- Select **Use MLE / OLS optimum** to move the controls to the shared optimum for the current sample.
 - Generate a new fixed random sample while retaining reproducibility through a seed.
-- Switch to the **Likelihood landscape** to compare the current candidate coefficients with the MLE.
+- Switch among **Conditional distributions**, **Least squares**, and **Likelihood landscape**.
 - Export the active chart as a high-resolution PNG on larger screens.
 
 ## Statistical model
@@ -54,7 +69,17 @@ $$
 \left(y_i-\beta_0-\beta_1x_i\right)^2.
 $$
 
-Under normal homoskedastic errors, maximizing the likelihood with respect to \(\beta_0\) and \(\beta_1\) gives the ordinary least-squares estimates. The maximum-likelihood estimator of the error variance is
+For fixed \(\sigma\), the first term is constant in \(\beta_0\) and \(\beta_1\), while the second term is a negative constant multiple of SSE. Therefore,
+
+$$
+\arg\max_{\beta_0,\beta_1}
+\ell(\beta_0,\beta_1,\sigma)
+=
+\arg\min_{\beta_0,\beta_1}
+\operatorname{SSE}(\beta_0,\beta_1).
+$$
+
+Under normal homoskedastic errors, maximizing the likelihood with respect to the regression coefficients gives the ordinary least-squares estimates. The maximum-likelihood estimator of the error variance is
 
 $$
 \hat\sigma^2_{\mathrm{MLE}}
@@ -72,13 +97,29 @@ The application calculates these quantities directly in JavaScript and updates t
 
 Each sideways profile is the conditional density of \(Y\) at one fixed predictor value. Its center lies on the regression line. The amber segment shows the density assigned to the observed outcome at that predictor value.
 
-This makes it possible to see that:
+This view makes it possible to see that:
 
 - changing \(\beta_0\) shifts all conditional means equally
 - changing \(\beta_1\) affects observations differently depending on their predictor values
 - changing \(\sigma\) changes both density spread and peak height
 - observations with large residuals receive lower density under the candidate model
 - the joint likelihood is built from all observation-level density contributions
+
+### Least-squares view
+
+The current candidate line is shown together with all vertical residuals. Shaded squares use \(|e_i|\) as their side length, so each square area represents \(e_i^2\). The total squared area is the SSE.
+
+The view also shows the OLS/MLE optimum as a dashed reference line, the current SSE, the gap to the minimum SSE, and the identity
+
+$$
+\ell
+=
+\text{constant}
+-
+\frac{\operatorname{SSE}}{2\sigma^2}.
+$$
+
+For larger samples, every residual line remains visible while a representative subset of squared-residual areas is drawn to preserve readability and rendering performance.
 
 ### Likelihood-landscape view
 
@@ -102,9 +143,9 @@ Increasing the sample size preserves the existing seeded observations and append
 The application is fully static and runs entirely in the browser.
 
 - **HTML** provides the application structure.
-- **CSS** provides the desktop and mobile layouts.
-- **Vanilla JavaScript** performs sample generation, MLE calculations, likelihood calculations, and interaction handling.
-- **Plotly.js** renders the regression, density, residual, contribution, and likelihood visualizations.
+- **CSS** provides the desktop, mobile, and least-squares layouts.
+- **Vanilla JavaScript** performs sample generation, OLS/MLE calculations, likelihood calculations, and interaction handling.
+- **Plotly.js** renders the regression, density, residual, squared-residual, and likelihood visualizations.
 - **GitHub Actions** deploys the application automatically to GitHub Pages after updates to `main`.
 
 There is no Python server, backend process, database, API key, or paid hosting dependency.
@@ -120,6 +161,7 @@ The mobile interface also includes:
 - larger slider touch targets
 - iPhone safe-area support
 - an expandable **More controls** panel
+- horizontally scrollable analysis tabs
 - compact chart margins, labels, legends, and annotations
 - disabled Plotly scroll zoom to avoid conflicts with normal page scrolling
 - a hidden Plotly mode bar so the model controls remain the primary interaction
@@ -152,9 +194,12 @@ interactive-regression-likelihood/
 ├── assets/
 │   ├── app.js
 │   ├── mobile.js
+│   ├── ols.js
+│   ├── ols-sync.js
 │   ├── favicon.svg
 │   ├── style.css
 │   ├── mobile.css
+│   ├── ols.css
 │   └── vendor/
 │       └── plotly.min.js
 └── .github/
