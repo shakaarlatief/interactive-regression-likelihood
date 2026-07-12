@@ -3,18 +3,20 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <meta name="description" content="An interactive browser-based exploration of maximum likelihood in normal homoskedastic linear regression.">
+    <meta name="description" content="An interactive browser-based exploration of maximum likelihood and ordinary least squares in normal homoskedastic linear regression.">
     <meta name="theme-color" content="#f7f9fc">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>Regression Likelihood Explorer</title>
-    <link rel="icon" href="assets/favicon.svg?v=20260712-3" type="image/svg+xml">
-    <link rel="stylesheet" href="assets/style.css?v=20260712-3">
-    <link rel="stylesheet" href="assets/mobile.css?v=20260712-3">
-    <script defer src="assets/vendor/plotly.min.js?v=20260712-3"></script>
-    <script defer src="assets/mobile.js?v=20260712-3"></script>
-    <script defer src="assets/app.js?v=20260712-3"></script>
+    <link rel="icon" href="assets/favicon.svg?v=20260712-4" type="image/svg+xml">
+    <link rel="stylesheet" href="assets/style.css?v=20260712-4">
+    <link rel="stylesheet" href="assets/mobile.css?v=20260712-4">
+    <link rel="stylesheet" href="assets/ols.css?v=20260712-4">
+    <script defer src="assets/vendor/plotly.min.js?v=20260712-4"></script>
+    <script defer src="assets/mobile.js?v=20260712-4"></script>
+    <script defer src="assets/app.js?v=20260712-4"></script>
+    <script defer src="assets/ols.js?v=20260712-4"></script>
 </head>
 <body>
     <noscript>
@@ -29,8 +31,8 @@
             </div>
             <h1>Maximum likelihood in normal linear regression</h1>
             <p>
-                Hold the observed sample fixed, then move the candidate parameters. Every conditional normal distribution
-                shifts with the regression coefficients, while the common standard deviation changes its spread and peak height.
+                Hold the observed sample fixed, then move the candidate parameters. Compare the probability-model view of maximum likelihood
+                with the geometric least-squares view in which the same regression coefficients minimize the sum of squared residuals.
             </p>
         </header>
 
@@ -40,6 +42,9 @@
                     <div class="tab-bar" role="tablist" aria-label="Analysis view">
                         <button class="tab-button is-active" id="conditional-tab" type="button" role="tab" aria-selected="true" aria-controls="conditional-panel" data-tab="conditional">
                             Conditional distributions
+                        </button>
+                        <button class="tab-button" id="ols-tab" type="button" role="tab" aria-selected="false" aria-controls="ols-panel" data-tab="ols">
+                            Least squares
                         </button>
                         <button class="tab-button" id="likelihood-tab" type="button" role="tab" aria-selected="false" aria-controls="likelihood-panel" data-tab="likelihood">
                             Likelihood landscape
@@ -57,6 +62,30 @@
                             At each displayed predictor value, the sideways curve is the conditional density of the outcome. Its center lies on the regression line.
                         </p>
                         <div id="conditional-graph" class="plot-container" aria-label="Conditional normal regression visualization"></div>
+                    </div>
+
+                    <div id="ols-panel" class="tab-panel is-hidden" role="tabpanel" aria-labelledby="ols-tab">
+                        <p class="tab-explanation">
+                            The vertical lines are residuals, eᵢ = yᵢ − ŷᵢ. Their shaded square areas represent eᵢ². Ordinary least squares chooses β₀ and β₁ to make the total area, SSE = Σeᵢ², as small as possible.
+                        </p>
+                        <div id="ols-graph" class="plot-container" aria-label="Ordinary least-squares residual visualization"></div>
+                        <div class="ols-objective-strip" aria-label="Least-squares objective summary">
+                            <article class="ols-objective-card">
+                                <div class="ols-objective-label">Current objective</div>
+                                <div class="ols-objective-value" id="ols-sse-value">Loading</div>
+                                <div class="ols-objective-note" id="ols-square-note">SSE is the sum of all squared residuals.</div>
+                            </article>
+                            <article class="ols-objective-card">
+                                <div class="ols-objective-label">Gap to OLS minimum</div>
+                                <div class="ols-objective-value" id="ols-gap-value">Loading</div>
+                                <div class="ols-objective-note">Current SSE minus the smallest achievable SSE for this fixed sample.</div>
+                            </article>
+                            <article class="ols-objective-card">
+                                <div class="ols-objective-label">Normal-model equivalence</div>
+                                <div class="ols-objective-value" id="ols-equivalence-value">Loading</div>
+                                <div class="ols-objective-note">For fixed σ, maximizing the normal log-likelihood in β is exactly the same as minimizing SSE.</div>
+                            </article>
+                        </div>
                     </div>
 
                     <div id="likelihood-panel" class="tab-panel is-hidden" role="tabpanel" aria-labelledby="likelihood-tab">
@@ -91,10 +120,10 @@
                 </section>
 
                 <section class="interpretation-card">
-                    <div class="interpretation-title">How to read the moving densities</div>
+                    <div class="interpretation-title">Two views of the same coefficient problem</div>
                     <p>
-                        Each sideways profile is a normal density over possible y-values at one fixed x. The amber segment shows the density assigned to the observed y-value.
-                        Moving β₀ or β₁ changes all conditional centers at once. Moving σ changes every profile's spread and density height without moving its center.
+                        In the probability view, β₀ and β₁ shift the conditional normal distributions to maximize the joint density of the observed sample.
+                        In the least-squares view, the same coefficients move the line to minimize Σeᵢ². Under normal homoskedastic errors, both criteria produce the same coefficient estimates.
                     </p>
                 </section>
             </div>
@@ -134,7 +163,7 @@
                     </div>
                     <input class="parameter-slider" id="sigma-slider" type="range" min="0.35" max="3" step="0.005" value="1.1">
                     <div class="range-labels"><span>0.35</span><span>1.5</span><span>3</span></div>
-                    <p class="control-caption">Changes the common spread and peak height of every conditional density.</p>
+                    <p class="control-caption">Changes the common spread and peak height of every conditional density. It does not change the OLS line or residuals.</p>
                 </div>
 
                 <div class="divider mobile-extra-control"></div>
@@ -174,7 +203,7 @@
                 <div class="divider mobile-extra-control"></div>
 
                 <div class="button-row mobile-extra-control">
-                    <button class="button button-primary" id="use-mle-button" type="button">Use MLE</button>
+                    <button class="button button-primary" id="use-mle-button" type="button">Use MLE / OLS optimum</button>
                     <button class="button button-secondary" id="reset-button" type="button">Reset</button>
                 </div>
                 <button class="button button-wide mobile-extra-control" id="new-sample-button" type="button">Generate a new fixed sample</button>
@@ -183,7 +212,7 @@
                     <div class="equation-label">Model</div>
                     <div class="equation-main">Y | X=x ∼ N(β₀ + β₁x, σ²)</div>
                     <div class="candidate-equation" id="candidate-equation">Current: N(1.20 + 0.750x, 1.100²)</div>
-                    <p class="equation-note">The observed data remain fixed. Only the candidate probability model moves.</p>
+                    <p class="equation-note">The observed data remain fixed. Only the candidate probability model and regression line move.</p>
                 </section>
 
                 <div class="sample-meta mobile-extra-control">
