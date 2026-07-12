@@ -30,14 +30,16 @@
     .controls-card {
         position: fixed;
         z-index: 1000;
+        top: auto;
         right: 10px;
         bottom: max(8px, env(safe-area-inset-bottom, 0px));
         left: 10px;
         display: block;
-        max-height: calc(100dvh - 24px - env(safe-area-inset-bottom, 0px));
+        height: auto;
+        max-height: none;
         padding: 13px 14px 12px;
         overflow-x: hidden;
-        overflow-y: auto;
+        overflow-y: hidden;
         overscroll-behavior: contain;
         background: rgba(255, 255, 255, 0.97);
         border: 1px solid rgba(203, 213, 225, 0.96);
@@ -60,6 +62,7 @@
 
     .controls-card.is-mobile-expanded {
         max-height: min(78dvh, 720px);
+        overflow-y: auto;
     }
 
     .controls-card .panel-title {
