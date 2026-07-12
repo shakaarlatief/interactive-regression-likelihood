@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="An interactive browser-based exploration of maximum likelihood in normal homoskedastic linear regression.">
+    <meta name="theme-color" content="#f7f9fc">
+    <title>Regression Likelihood Explorer</title>
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="assets/style.css">
+    <script defer src="assets/vendor/plotly.min.js"></script>
+    <script defer src="assets/app.js"></script>
+</head>
+<body>
+    <noscript>
+        <div class="noscript-banner">This application requires JavaScript.</div>
+    </noscript>
+
+    <main class="app-shell">
+        <header class="hero">
+            <div class="eyebrow-row">
+                <span class="eyebrow">Interactive statistical visualization</span>
+                <span class="live-badge">Runs locally in your browser</span>
+            </div>
+            <h1>Maximum likelihood in normal linear regression</h1>
+            <p>
+                Hold the observed sample fixed, then move the candidate parameters. Every conditional normal distribution
+                shifts with the regression coefficients, while the common standard deviation changes its spread and peak height.
+            </p>
+        </header>
+
+        <section class="workspace" aria-label="Regression likelihood explorer">
+            <div class="visual-column">
+                <section class="chart-card" aria-label="Interactive visualization">
+                    <div class="tab-bar" role="tablist" aria-label="Analysis view">
+                        <button class="tab-button is-active" id="conditional-tab" type="button" role="tab" aria-selected="true" aria-controls="conditional-panel" data-tab="conditional">
+                            Conditional distributions
+                        </button>
+                        <button class="tab-button" id="likelihood-tab" type="button" role="tab" aria-selected="false" aria-controls="likelihood-panel" data-tab="likelihood">
+                            Likelihood landscape
+                        </button>
+                        <div class="tab-actions">
+                            <button class="icon-button" id="download-chart-button" type="button" title="Download the current chart as a PNG image" aria-label="Download current chart">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v11m0 0 4-4m-4 4-4-4M5 15v4h14v-4"/></svg>
+                                Export
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="conditional-panel" class="tab-panel" role="tabpanel" aria-labelledby="conditional-tab">
+                        <p class="tab-explanation">
+                            At each displayed predictor value, the sideways curve is the conditional density of the outcome. Its center lies on the regression line.
+                        </p>
+                        <div id="conditional-graph" class="plot-container" aria-label="Conditional normal regression visualization"></div>
+                    </div>
+
+                    <div id="likelihood-panel" class="tab-panel is-hidden" role="tabpanel" aria-labelledby="likelihood-tab">
+                        <p class="tab-explanation">
+                            The surface shows the log-likelihood across intercept and slope values for the current value of σ. The star marks the MLE and the red point marks the current candidate.
+                        </p>
+                        <div id="likelihood-graph" class="plot-container" aria-label="Log-likelihood contour visualization"></div>
+                    </div>
+                </section>
+
+                <section class="metrics-grid" aria-label="Model diagnostics">
+                    <article class="metric-card">
+                        <div class="metric-label">Current log-likelihood</div>
+                        <div class="metric-value" id="metric-loglik-value">Loading</div>
+                        <div class="metric-note">Sum of observation-level log densities</div>
+                    </article>
+                    <article class="metric-card">
+                        <div class="metric-label">Gap to maximum</div>
+                        <div class="metric-value" id="metric-gap-value">Loading</div>
+                        <div class="metric-note">MLE log-likelihood minus current value</div>
+                    </article>
+                    <article class="metric-card">
+                        <div class="metric-label">Residual sum of squares</div>
+                        <div class="metric-value" id="metric-sse-value">Loading</div>
+                        <div class="metric-note">Determined by β₀ and β₁</div>
+                    </article>
+                    <article class="metric-card">
+                        <div class="metric-label">Root mean squared error</div>
+                        <div class="metric-value" id="metric-rmse-value">Loading</div>
+                        <div class="metric-note">Typical residual magnitude</div>
+                    </article>
+                </section>
+
+                <section class="interpretation-card">
+                    <div class="interpretation-title">How to read the moving densities</div>
+                    <p>
+                        Each sideways profile is a normal density over possible y-values at one fixed x. The amber segment shows the density assigned to the observed y-value.
+                        Moving β₀ or β₁ changes all conditional centers at once. Moving σ changes every profile's spread and density height without moving its center.
+                    </p>
+                </section>
+            </div>
+
+            <aside class="controls-card" aria-label="Model controls">
+                <div class="panel-title">Model controls</div>
+                <p class="panel-copy">Drag any slider. The visualization is redrawn on the browser's next animation frame.</p>
+
+                <div class="control-block">
+                    <div class="control-heading">
+                        <label class="control-label" for="beta0-slider">Intercept β₀</label>
+                        <output class="control-value" id="beta0-display" for="beta0-slider">1.200</output>
+                    </div>
+                    <input class="parameter-slider" id="beta0-slider" type="range" min="-4" max="6" step="0.01" value="1.2">
+                    <div class="range-labels"><span>−4</span><span>1</span><span>6</span></div>
+                    <p class="control-caption">Translates every conditional mean by the same amount.</p>
+                </div>
+
+                <div class="control-block">
+                    <div class="control-heading">
+                        <label class="control-label" for="beta1-slider">Slope β₁</label>
+                        <output class="control-value" id="beta1-display" for="beta1-slider">0.750</output>
+                    </div>
+                    <input class="parameter-slider" id="beta1-slider" type="range" min="-2" max="3" step="0.005" value="0.75">
+                    <div class="range-labels"><span>−2</span><span>0.5</span><span>3</span></div>
+                    <p class="control-caption">Rotates the mean line and shifts each density by an x-dependent amount.</p>
+                </div>
+
+                <div class="control-block">
+                    <div class="control-heading">
+                        <label class="control-label" for="sigma-slider">Standard deviation σ</label>
+                        <output class="control-value" id="sigma-display" for="sigma-slider">1.100</output>
+                    </div>
+                    <input class="parameter-slider" id="sigma-slider" type="range" min="0.35" max="3" step="0.005" value="1.1">
+                    <div class="range-labels"><span>0.35</span><span>1.5</span><span>3</span></div>
+                    <p class="control-caption">Changes the common spread and peak height of every conditional density.</p>
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="secondary-control">
+                    <div class="control-heading">
+                        <label class="control-label" for="slice-slider">Displayed density slices</label>
+                        <output class="control-value" id="slice-display" for="slice-slider">7</output>
+                    </div>
+                    <input class="parameter-slider" id="slice-slider" type="range" min="4" max="14" step="1" value="7">
+                    <div class="range-labels"><span>4</span><span>9</span><span>14</span></div>
+                </div>
+
+                <fieldset class="display-options">
+                    <legend>Visual layers</legend>
+                    <label class="option-label">
+                        <input id="show-residuals" type="checkbox" checked>
+                        <span>Show residuals</span>
+                    </label>
+                    <label class="option-label">
+                        <input id="show-contributions" type="checkbox" checked>
+                        <span>Show density contributions</span>
+                    </label>
+                </fieldset>
+
+                <div class="divider"></div>
+
+                <div class="button-row">
+                    <button class="button button-primary" id="use-mle-button" type="button">Use MLE</button>
+                    <button class="button button-secondary" id="reset-button" type="button">Reset</button>
+                </div>
+                <button class="button button-wide" id="new-sample-button" type="button">Generate a new fixed sample</button>
+
+                <section class="equation-card" aria-label="Current model">
+                    <div class="equation-label">Model</div>
+                    <div class="equation-main">Y | X=x ∼ N(β₀ + β₁x, σ²)</div>
+                    <div class="candidate-equation" id="candidate-equation">Current: N(1.20 + 0.750x, 1.100²)</div>
+                    <p class="equation-note">The observed data remain fixed. Only the candidate probability model moves.</p>
+                </section>
+
+                <div class="sample-meta">
+                    <span>Sample seed</span>
+                    <strong id="sample-seed">17</strong>
+                </div>
+            </aside>
+        </section>
+
+        <footer class="site-footer">
+            <span>Interactive Regression Likelihood Explorer</span>
+            <span>Built with vanilla JavaScript and Plotly.js</span>
+        </footer>
+    </main>
+</body>
+</html>
