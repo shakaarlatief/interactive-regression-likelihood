@@ -2,13 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="description" content="An interactive browser-based exploration of maximum likelihood in normal homoskedastic linear regression.">
     <meta name="theme-color" content="#f7f9fc">
     <title>Regression Likelihood Explorer</title>
     <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="assets/style.css">
+    <link rel="stylesheet" href="assets/mobile.css">
     <script defer src="assets/vendor/plotly.min.js"></script>
+    <script defer src="assets/mobile.js"></script>
     <script defer src="assets/app.js"></script>
 </head>
 <body>
@@ -97,6 +99,10 @@
             <aside class="controls-card" aria-label="Model controls">
                 <div class="panel-title">Model controls</div>
                 <p class="panel-copy">Drag any slider. The visualization is redrawn on the browser's next animation frame.</p>
+                <button class="mobile-controls-toggle" id="mobile-controls-toggle" type="button" aria-expanded="false" aria-label="Show more model controls">
+                    <span id="mobile-controls-toggle-label">More controls</span>
+                    <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5 7.5 5 5 5-5"/></svg>
+                </button>
 
                 <div class="control-block">
                     <div class="control-heading">
@@ -128,9 +134,9 @@
                     <p class="control-caption">Changes the common spread and peak height of every conditional density.</p>
                 </div>
 
-                <div class="divider"></div>
+                <div class="divider mobile-extra-control"></div>
 
-                <div class="secondary-control">
+                <div class="secondary-control mobile-extra-control">
                     <div class="control-heading">
                         <label class="control-label" for="observation-slider">Sample size n</label>
                         <output class="control-value" id="observation-display" for="observation-slider">14</output>
@@ -140,7 +146,7 @@
                     <p class="control-caption">Changes the number of randomly generated observations. Predictor values are sampled from a finite grid, so multiple observations can share the same x-value.</p>
                 </div>
 
-                <div class="secondary-control">
+                <div class="secondary-control mobile-extra-control">
                     <div class="control-heading">
                         <label class="control-label" for="slice-slider">Displayed density slices</label>
                         <output class="control-value" id="slice-display" for="slice-slider">7</output>
@@ -150,7 +156,7 @@
                     <p class="control-caption">Can be increased up to the full sample size, so a density may be displayed for every observation.</p>
                 </div>
 
-                <fieldset class="display-options">
+                <fieldset class="display-options mobile-extra-control">
                     <legend>Visual layers</legend>
                     <label class="option-label">
                         <input id="show-residuals" type="checkbox" checked>
@@ -162,26 +168,26 @@
                     </label>
                 </fieldset>
 
-                <div class="divider"></div>
+                <div class="divider mobile-extra-control"></div>
 
-                <div class="button-row">
+                <div class="button-row mobile-extra-control">
                     <button class="button button-primary" id="use-mle-button" type="button">Use MLE</button>
                     <button class="button button-secondary" id="reset-button" type="button">Reset</button>
                 </div>
-                <button class="button button-wide" id="new-sample-button" type="button">Generate a new fixed sample</button>
+                <button class="button button-wide mobile-extra-control" id="new-sample-button" type="button">Generate a new fixed sample</button>
 
-                <section class="equation-card" aria-label="Current model">
+                <section class="equation-card mobile-extra-control" aria-label="Current model">
                     <div class="equation-label">Model</div>
                     <div class="equation-main">Y | X=x ∼ N(β₀ + β₁x, σ²)</div>
                     <div class="candidate-equation" id="candidate-equation">Current: N(1.20 + 0.750x, 1.100²)</div>
                     <p class="equation-note">The observed data remain fixed. Only the candidate probability model moves.</p>
                 </section>
 
-                <div class="sample-meta">
+                <div class="sample-meta mobile-extra-control">
                     <span>Sample size</span>
                     <strong id="sample-size">14</strong>
                 </div>
-                <div class="sample-meta">
+                <div class="sample-meta mobile-extra-control">
                     <span>Sample seed</span>
                     <strong id="sample-seed">17</strong>
                 </div>
