@@ -2,22 +2,17 @@
 
 A static, portfolio-ready web application for exploring maximum likelihood in a normal homoskedastic linear regression.
 
-
-The observed sample remains fixed while the user continuously changes:
+For a selected seed and sample size, the observed sample remains fixed while the user continuously changes:
 
 - the intercept, β₀
 - the slope, β₁
 - the common conditional standard deviation, σ
 
-The regression line, conditional normal densities, residuals, observation-level density contributions, log-likelihood, residual sum of squares, and likelihood landscape all respond immediately in the browser.
+The regression line, conditional normal densities, residuals, observation-level density contributions, log-likelihood, residual sum of squares, and likelihood landscape all respond immediately in the browser. The sample-size control can increase the fixed sample from 14 to 100 observations.
 
 ## Live application
 
-After GitHub Pages is enabled, place the public URL here:
-
-```text
-https://YOUR-GITHUB-USERNAME.github.io/interactive-regression-likelihood-explorer/
-```
+[Open the live application](https://shakaarlatief.github.io/interactive-regression-likelihood/)
 
 ## Portfolio presentation
 
@@ -39,7 +34,7 @@ The Plotly.js runtime is included locally under `assets/vendor/`. The applicatio
 ## Project structure
 
 ```text
-interactive_regression_likelihood_explorer_static/
+interactive-regression-likelihood/
 ├── index.html
 ├── README.md
 ├── LICENSE
@@ -74,7 +69,7 @@ No Python packages are required. Python is only being used here as a convenient 
 
 ## Deploy to GitHub Pages
 
-1. Create a new public GitHub repository, for example `interactive-regression-likelihood-explorer`.
+1. Create a new public GitHub repository, for example `interactive-regression-likelihood`.
 2. Copy the project files into the repository root.
 3. Commit and push the files to the `main` branch.
 4. In the GitHub repository, open **Settings**, then **Pages**.
@@ -89,10 +84,11 @@ The deployment workflow requires no secrets and no paid hosting service.
 - Drag **Intercept β₀** to translate every conditional mean by the same amount.
 - Drag **Slope β₁** to rotate the regression line and move each conditional density according to its x-value.
 - Drag **Standard deviation σ** to change the common spread and peak height of every conditional density.
+- Change **Sample size n** from 14 to 100 observations. Increasing n preserves the existing seeded observations and adds new ones.
 - Change **Displayed density slices** to control the visual detail without changing the likelihood calculation.
 - Toggle residuals and density contributions.
 - Select **Use MLE** to move the controls to the maximum-likelihood estimates for the fixed sample.
-- Select **Generate a new fixed sample** to simulate another dataset.
+- Select **Generate a new fixed sample** to simulate another dataset while preserving the selected sample size.
 - Switch to **Likelihood landscape** to see the current candidate relative to the MLE.
 - Use **Export** to save the active chart as a high-resolution PNG image.
 
@@ -118,7 +114,7 @@ Under normal homoskedastic errors, maximizing the likelihood with respect to β�
 
 ## Implementation notes
 
-- Sample generation uses a deterministic seeded pseudorandom number generator, so the initial visualization is reproducible.
+- Sample generation uses a deterministic seeded pseudorandom number generator, so the visualization is reproducible. The first 14 observations match the default sample, and larger sample sizes append deterministic observations without altering the existing points.
 - OLS and the normal-regression MLE are calculated directly in JavaScript.
 - The likelihood contour is generated from a precomputed residual-sum-of-squares grid for each fixed sample.
 - Main-chart updates are coalesced to the browser refresh cycle with `requestAnimationFrame`.
