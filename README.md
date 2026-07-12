@@ -46,8 +46,10 @@ interactive-regression-likelihood/
 ├── .nojekyll
 ├── assets/
 │   ├── app.js
+│   ├── mobile.js
 │   ├── favicon.svg
 │   ├── style.css
+│   ├── mobile.css
 │   └── vendor/
 │       └── plotly.min.js
 └── .github/
@@ -94,7 +96,20 @@ The deployment workflow requires no secrets and no paid hosting service.
 - Select **Use MLE** to move the controls to the maximum-likelihood estimates for the fixed sample.
 - Select **Generate a new fixed sample** to simulate another dataset.
 - Switch to **Likelihood landscape** to see the current candidate relative to the MLE.
-- Use **Export** to save the active chart as a high-resolution PNG image.
+- Use **Export** to save the active chart as a high-resolution PNG image on larger screens.
+
+## Mobile experience
+
+On screens up to 820 pixels wide, the application uses a dedicated bottom control tray so the plot remains visible while β₀, β₁, and σ are dragged. The three primary model controls remain permanently available, while sample generation, density count, visual-layer switches, MLE controls, and model details are available through **More controls**.
+
+The mobile presentation also:
+
+- increases slider touch targets
+- accounts for iPhone safe-area insets
+- removes Plotly scroll zoom to avoid conflicts with page scrolling
+- uses compact chart margins, axis labels, annotations, legends, and contour colorbars
+- hides the Plotly mode bar and uses the application controls as the primary mobile interaction
+- preserves the desktop and laptop layout unchanged
 
 ## Statistical interpretation
 
@@ -125,6 +140,8 @@ Under normal homoskedastic errors, maximizing the likelihood with respect to β�
 - The likelihood contour is generated from a precomputed residual-sum-of-squares grid for each fixed sample.
 - Main-chart updates are coalesced to the browser refresh cycle with `requestAnimationFrame`.
 - The heavier likelihood contour is updated only when its tab is active.
+- `assets/mobile.js` applies mobile-only Plotly layout and interaction adaptations without changing the desktop rendering path.
+- `assets/mobile.css` provides the fixed mobile control tray, expanded secondary controls, safe-area spacing, and larger touch targets.
 - The application is responsive and includes keyboard-accessible native controls.
 
 ## License
