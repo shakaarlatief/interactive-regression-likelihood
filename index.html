@@ -132,6 +132,16 @@
 
                 <div class="secondary-control">
                     <div class="control-heading">
+                        <label class="control-label" for="observation-slider">Sample size n</label>
+                        <output class="control-value" id="observation-display" for="observation-slider">14</output>
+                    </div>
+                    <input class="parameter-slider" id="observation-slider" type="range" min="14" max="100" step="1" value="14">
+                    <div class="range-labels"><span>14</span><span>57</span><span>100</span></div>
+                    <p class="control-caption">Adds or removes observations from the fixed seeded sample. The parameter sliders still move only the candidate model.</p>
+                </div>
+
+                <div class="secondary-control">
+                    <div class="control-heading">
                         <label class="control-label" for="slice-slider">Displayed density slices</label>
                         <output class="control-value" id="slice-display" for="slice-slider">7</output>
                     </div>
@@ -166,6 +176,10 @@
                     <p class="equation-note">The observed data remain fixed. Only the candidate probability model moves.</p>
                 </section>
 
+                <div class="sample-meta">
+                    <span>Sample size</span>
+                    <strong id="sample-size">14</strong>
+                </div>
                 <div class="sample-meta">
                     <span>Sample seed</span>
                     <strong id="sample-seed">17</strong>
