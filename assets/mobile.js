@@ -118,10 +118,16 @@
 
     function resizeVisiblePlot() {
         if (!window.Plotly || !window.Plotly.Plots) return;
-        const conditionalPanel = document.getElementById("conditional-panel");
-        const graph = conditionalPanel && !conditionalPanel.classList.contains("is-hidden")
-            ? document.getElementById("conditional-graph")
-            : document.getElementById("likelihood-graph");
+        const candidates = [
+            ["conditional-panel", "conditional-graph"],
+            ["ols-panel", "ols-graph"],
+            ["likelihood-panel", "likelihood-graph"]
+        ];
+        const visible = candidates.find(([panelId]) => {
+            const panel = document.getElementById(panelId);
+            return panel && !panel.classList.contains("is-hidden");
+        });
+        const graph = visible ? document.getElementById(visible[1]) : null;
         if (graph) {
             window.requestAnimationFrame(() => window.Plotly.Plots.resize(graph));
         }
