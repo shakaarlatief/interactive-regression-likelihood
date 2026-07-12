@@ -2,17 +2,21 @@
 
 A static, portfolio-ready web application for exploring maximum likelihood in a normal homoskedastic linear regression.
 
-For a selected seed and sample size, the observed sample remains fixed while the user continuously changes:
+The observed sample remains fixed while the user continuously changes:
 
 - the intercept, β₀
 - the slope, β₁
 - the common conditional standard deviation, σ
 
-The regression line, conditional normal densities, residuals, observation-level density contributions, log-likelihood, residual sum of squares, and likelihood landscape all respond immediately in the browser. The sample-size control can increase the fixed sample from 14 to 100 observations.
+The regression line, conditional normal densities, residuals, observation-level density contributions, log-likelihood, residual sum of squares, and likelihood landscape all respond immediately in the browser.
 
 ## Live application
 
-[Open the live application](https://shakaarlatief.github.io/interactive-regression-likelihood/)
+The live application is available at:
+
+```text
+https://shakaarlatief.github.io/interactive-regression-likelihood/
+```
 
 ## Portfolio presentation
 
@@ -84,11 +88,11 @@ The deployment workflow requires no secrets and no paid hosting service.
 - Drag **Intercept β₀** to translate every conditional mean by the same amount.
 - Drag **Slope β₁** to rotate the regression line and move each conditional density according to its x-value.
 - Drag **Standard deviation σ** to change the common spread and peak height of every conditional density.
-- Change **Sample size n** from 14 to 100 observations. Increasing n preserves the existing seeded observations and adds new ones.
-- Change **Displayed density slices** to control the visual detail without changing the likelihood calculation.
+- Change **Sample size n** from 14 to 200 observations. All predictor and outcome values are generated pseudorandomly from the selected seed. Predictor values are sampled from a finite grid, so repeated x-values can occur naturally.
+- Change **Displayed density slices** from 4 up to the full sample size. Setting it equal to n displays one conditional-density profile per observation; profiles overlap when observations share the same x-value.
 - Toggle residuals and density contributions.
 - Select **Use MLE** to move the controls to the maximum-likelihood estimates for the fixed sample.
-- Select **Generate a new fixed sample** to simulate another dataset while preserving the selected sample size.
+- Select **Generate a new fixed sample** to simulate another dataset.
 - Switch to **Likelihood landscape** to see the current candidate relative to the MLE.
 - Use **Export** to save the active chart as a high-resolution PNG image.
 
@@ -114,7 +118,9 @@ Under normal homoskedastic errors, maximizing the likelihood with respect to β�
 
 ## Implementation notes
 
-- Sample generation uses a deterministic seeded pseudorandom number generator, so the visualization is reproducible. The first 14 observations match the default sample, and larger sample sizes append deterministic observations without altering the existing points.
+- Sample generation uses a deterministic seeded pseudorandom number generator. "Deterministic" means reproducible for a given seed, not non-random: every observation receives a random predictor value and a random normal error draw.
+- Predictor values are sampled from a finite grid between 0.5 and 9.5, which makes exact repeated x-values possible. Increasing n preserves the existing seeded observations and appends additional random observations.
+- The sample-size control supports 14 through 200 observations, and the density-slice limit updates dynamically to equal n.
 - OLS and the normal-regression MLE are calculated directly in JavaScript.
 - The likelihood contour is generated from a precomputed residual-sum-of-squares grid for each fixed sample.
 - Main-chart updates are coalesced to the browser refresh cycle with `requestAnimationFrame`.
