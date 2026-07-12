@@ -1,0 +1,354 @@
+.mobile-controls-toggle {
+    display: none;
+}
+
+@media (max-width: 820px) {
+    :root {
+        --mobile-control-tray-height: 224px;
+    }
+
+    body {
+        padding-bottom: calc(var(--mobile-control-tray-height) + env(safe-area-inset-bottom, 0px));
+    }
+
+    .app-shell {
+        padding-bottom: 22px;
+    }
+
+    .chart-card {
+        min-height: 0;
+    }
+
+    .tab-panel {
+        min-height: 500px;
+    }
+
+    .plot-container {
+        min-height: 480px;
+    }
+
+    .controls-card {
+        position: fixed;
+        z-index: 1000;
+        right: 10px;
+        bottom: max(8px, env(safe-area-inset-bottom, 0px));
+        left: 10px;
+        display: block;
+        max-height: calc(100dvh - 24px - env(safe-area-inset-bottom, 0px));
+        padding: 13px 14px 12px;
+        overflow-x: hidden;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        background: rgba(255, 255, 255, 0.97);
+        border: 1px solid rgba(203, 213, 225, 0.96);
+        border-radius: 18px;
+        box-shadow: 0 18px 50px rgba(15, 23, 42, 0.22), 0 4px 14px rgba(15, 23, 42, 0.09);
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+        scrollbar-width: thin;
+    }
+
+    .controls-card::before {
+        display: block;
+        width: 42px;
+        height: 4px;
+        margin: -4px auto 7px;
+        content: "";
+        background: #cbd5e1;
+        border-radius: 999px;
+    }
+
+    .controls-card.is-mobile-expanded {
+        max-height: min(78dvh, 720px);
+    }
+
+    .controls-card .panel-title {
+        min-height: 28px;
+        padding-right: 132px;
+        font-size: 0.92rem;
+        line-height: 28px;
+    }
+
+    .controls-card .panel-copy {
+        display: none;
+    }
+
+    .mobile-controls-toggle {
+        position: absolute;
+        top: 16px;
+        right: 14px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        min-height: 34px;
+        padding: 0 10px;
+        color: var(--blue-dark);
+        background: #eff6ff;
+        border: 1px solid rgba(37, 99, 235, 0.22);
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 0.72rem;
+        font-weight: 760;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .mobile-controls-toggle:focus-visible {
+        outline: 3px solid rgba(37, 99, 235, 0.24);
+        outline-offset: 2px;
+    }
+
+    .mobile-controls-toggle svg {
+        width: 14px;
+        height: 14px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        transition: transform 150ms ease;
+    }
+
+    .controls-card.is-mobile-expanded .mobile-controls-toggle svg {
+        transform: rotate(180deg);
+    }
+
+    .controls-card .control-block,
+    .controls-card.is-mobile-expanded .secondary-control {
+        display: grid;
+        grid-template-columns: minmax(88px, 0.9fr) minmax(120px, 2.1fr) 50px;
+        grid-template-areas: "label slider value";
+        align-items: center;
+        gap: 8px;
+        min-height: 43px;
+        margin: 0;
+    }
+
+    .controls-card .control-heading,
+    .controls-card.is-mobile-expanded .secondary-control .control-heading {
+        display: contents;
+    }
+
+    .controls-card .control-label {
+        grid-area: label;
+        overflow: hidden;
+        font-size: 0.76rem;
+        font-weight: 720;
+        line-height: 1.15;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .controls-card .control-value {
+        grid-area: value;
+        font-size: 0.75rem;
+        text-align: right;
+    }
+
+    .controls-card .parameter-slider {
+        grid-area: slider;
+        height: 42px;
+        touch-action: pan-y;
+    }
+
+    .controls-card .parameter-slider::-webkit-slider-thumb {
+        width: 25px;
+        height: 25px;
+        margin-top: -10px;
+        border-width: 3px;
+    }
+
+    .controls-card .parameter-slider::-moz-range-thumb {
+        width: 19px;
+        height: 19px;
+        border-width: 3px;
+    }
+
+    .controls-card .range-labels,
+    .controls-card .control-caption {
+        display: none;
+    }
+
+    .controls-card .mobile-extra-control {
+        display: none;
+    }
+
+    .controls-card.is-mobile-expanded .mobile-extra-control.divider {
+        display: block;
+        margin: 8px 0 11px;
+    }
+
+    .controls-card.is-mobile-expanded .mobile-extra-control.secondary-control {
+        display: grid;
+    }
+
+    .controls-card.is-mobile-expanded .mobile-extra-control.display-options {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 9px 12px;
+        margin: 10px 0 12px;
+    }
+
+    .controls-card.is-mobile-expanded .display-options legend {
+        grid-column: 1 / -1;
+        margin-bottom: 0;
+    }
+
+    .controls-card.is-mobile-expanded .option-label {
+        min-height: 38px;
+        padding: 7px 9px;
+        background: #f8fafc;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        font-size: 0.74rem;
+    }
+
+    .controls-card.is-mobile-expanded .option-label input {
+        width: 20px;
+        height: 20px;
+        flex: 0 0 auto;
+    }
+
+    .controls-card.is-mobile-expanded .mobile-extra-control.button-row {
+        display: grid;
+        margin-top: 2px;
+    }
+
+    .controls-card.is-mobile-expanded .mobile-extra-control.button-wide,
+    .controls-card.is-mobile-expanded .mobile-extra-control.equation-card {
+        display: block;
+    }
+
+    .controls-card.is-mobile-expanded .mobile-extra-control.sample-meta {
+        display: flex;
+    }
+
+    .controls-card.is-mobile-expanded .button {
+        min-height: 45px;
+    }
+
+    .controls-card.is-mobile-expanded .equation-card {
+        margin-top: 13px;
+        padding: 13px;
+    }
+
+    .controls-card.is-mobile-expanded .sample-meta {
+        margin-top: 10px;
+    }
+
+    .tab-explanation {
+        margin-top: 14px;
+        font-size: 0.78rem;
+    }
+
+    .tab-actions {
+        display: none;
+    }
+
+    .modebar-container {
+        display: none !important;
+    }
+}
+
+@media (max-width: 520px) {
+    :root {
+        --mobile-control-tray-height: 218px;
+    }
+
+    .app-shell {
+        width: calc(100% - 16px);
+        padding-top: 14px;
+    }
+
+    .hero {
+        padding-bottom: 16px;
+    }
+
+    .hero h1 {
+        font-size: clamp(1.78rem, 9vw, 2.25rem);
+    }
+
+    .hero p {
+        margin-top: 11px;
+        font-size: 0.88rem;
+        line-height: 1.55;
+    }
+
+    .eyebrow-row {
+        gap: 8px;
+        margin-bottom: 10px;
+    }
+
+    .eyebrow,
+    .live-badge {
+        font-size: 0.67rem;
+    }
+
+    .tab-bar {
+        min-height: 54px;
+        padding: 0 4px;
+    }
+
+    .tab-button {
+        min-height: 52px;
+        padding: 0 8px;
+        font-size: 0.72rem;
+    }
+
+    .tab-explanation {
+        margin-right: 13px;
+        margin-left: 13px;
+    }
+
+    .tab-panel {
+        min-height: 452px;
+    }
+
+    .plot-container {
+        min-height: 430px;
+    }
+
+    .controls-card {
+        right: 7px;
+        left: 7px;
+        padding-right: 11px;
+        padding-left: 11px;
+        border-radius: 16px;
+    }
+
+    .controls-card .panel-title {
+        padding-right: 122px;
+        font-size: 0.88rem;
+    }
+
+    .mobile-controls-toggle {
+        right: 11px;
+    }
+
+    .controls-card .control-block,
+    .controls-card.is-mobile-expanded .secondary-control {
+        grid-template-columns: minmax(77px, 0.85fr) minmax(104px, 2fr) 47px;
+        gap: 6px;
+    }
+
+    .controls-card .control-label {
+        font-size: 0.72rem;
+    }
+
+    .controls-card .control-value {
+        font-size: 0.71rem;
+    }
+
+    .metrics-grid {
+        gap: 10px;
+    }
+
+    .metric-card {
+        min-height: 102px;
+        padding: 14px 15px;
+    }
+
+    .interpretation-card {
+        padding: 15px 16px;
+    }
+}
